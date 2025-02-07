@@ -1,39 +1,32 @@
-#include <LW20.h>
-#include <lw20api.h>
+#define USER_SERIAL           Serial
+#define USER_SERIAL_BAUDRATE  115200
 
-LW20 lw20(Serial1, 115200); // Instantiate the LW20 using the hardware Serial Port1 at 115200 baud
-const int Motoroutput = 9;  
-const int MotorReverse = 10;
+#define LW20_SERIAL           Serial1
+#define LW20_BAUDRATE         115200
+
+char responseData[40];
+int responseDataSize = 0;
 
 void setup() 
 {
-  pinMode(Motoroutput, OUTPUT);
-  pinMode(MotorReverse, OUTPUT);
-  
-  // Start serial monitor port.
-  Serial.begin(115200); // Prepare the USB Terminal to use as a monitor
-
-  // Setup LW20.
-  lw20.init(); // Get the LW20 ready for commands
-  lw20.setLaserParams(LWMS_48);
+  USER_SERIAL.begin(115200);
 }
 
+void lw20Connect() {
+  LW20_SERIAL.begin(LW20_BAUDRATE);
+
+  // Send some characters to make sure the LW20 switches to serial mode.
+  LW20_SERIAL.print('www\r\n');
+}
 void loop() 
 {
-  // Get the first pulse distance with no filter.
-  float distance = 1;
-  float temperature = 1;
 
-  Serial.print("Distance: "); 
-  Serial.print(distance);
-  if (distance = 1 ){
-    digitalWrite(Motoroutput , HIGH);
-    delay (25);
-    digitalWrite(Motoroutput, LOW);
-    digitalWrite(MotorReverse, HIGH);
-    delay (25);
-    digitalWrite(MotorReverse, LOW);
-  }
-  delay(25);
+ float lw20GetDistance() {
+  // NOTE: LDL = median distance to last return.
+  if (lw20SendCommand("?ldl\r\n"))
+    return getNumberFromResponse(responseData);
+
+  return 0.0f;
+}
 
 }
